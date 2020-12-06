@@ -12,9 +12,9 @@ data_name = 'svhn' #  args[1]     # 'svhn', 'cifar10', 'cifar100'
 model_name = 'resnet18' # args[2]    # 'resnet18', 'resnet34', 'vgg16', 'vgg13', 'vgg11'
 noise_split = 0.2 # float(args[3])
 opt = 'adam' #args[4]
-lr = 3e-4 #  float(args[5])
+lr = 1e-4 #  float(args[5])
 test_id = 0 # int(args[6])
-data_root = '.' # args[7]
+data_root = '..' # args[7]
 
 # setting
 train_batch_size = 256 
