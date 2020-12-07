@@ -156,6 +156,7 @@ for id_epoch in range(train_epoch):
     print(measures)
     print("bounds: ")
     print(bounds)
+    store_measure(writer, measures, bounds, id_epoch)
     # =========================================================
 
     # recorder loss and acc

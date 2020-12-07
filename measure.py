@@ -339,3 +339,22 @@ def calculate(trained_model, init_model, device, train_loader, margin, dataset_n
             measure['Spectral norm'] * ratio / math.sqrt(m)
 
     return measure, bound
+
+    
+
+def store_measure(writer, measure, bound, id_epoch): 
+    writer.add_scalar('L_{1,inf} norm', measure['L_{1,inf} norm'], id_epoch+1)
+    writer.add_scalar('Frobenious norm', measure['Frobenious norm'], id_epoch+1)
+    writer.add_scalar('L_{3,1.5} norm', measure['L_{3,1.5} norm'], id_epoch+1)
+    writer.add_scalar('Spectral norm', measure['Spectral norm'], id_epoch+1)
+    writer.add_scalar('L_1.5 operator norm', measure['L_1.5 operator norm'], id_epoch+1)
+    writer.add_scalar('Trace norm', measure['Trace norm'], id_epoch+1)
+    writer.add_scalar('L1_path norm', measure['L1_path norm'], id_epoch+1)
+    writer.add_scalar('L1.5_path norm', measure['L1.5_path norm'], id_epoch+1)
+    writer.add_scalar('L2_path norm', measure['L2_path norm'], id_epoch+1)
+    writer.add_scalar('L1_max Bound (Bartlett and Mendelson 2002)', bound['L1_max Bound (Bartlett and Mendelson 2002)'], id_epoch+1)
+    writer.add_scalar('Frobenious Bound (Neyshabur et al. 2015)', bound['Frobenious Bound (Neyshabur et al. 2015)'], id_epoch+1)
+    writer.add_scalar('L_{3,1.5} Bound (Neyshabur et al. 2015)', bound['L_{3,1.5} Bound (Neyshabur et al. 2015)'], id_epoch+1)
+    writer.add_scalar('Spec_L_{2,1} Bound (Bartlett et al. 2017)', bound['Spec_L_{2,1} Bound (Bartlett et al. 2017)'], id_epoch+1)
+    writer.add_scalar('Spec_Fro Bound (Neyshabur et al. 2018)', bound['Spec_Fro Bound (Neyshabur et al. 2018)'], id_epoch+1)
+
