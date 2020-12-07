@@ -1,11 +1,12 @@
-from lib.ModelWrapper import ModelWrapper
-from tensorboardX import SummaryWriter
-import torch
-from torchvision import transforms, datasets
-import numpy as np
-import random
 import sys
 import os
+import random
+import numpy as np
+from torchvision import transforms, datasets
+import torch
+from tensorboardX import SummaryWriter
+from measure import *
+from ModelWrapper import ModelWrapper
 
 args = sys.argv
 data_name = 'svhn' #  args[1]     # 'svhn', 'cifar10', 'cifar100'
@@ -51,52 +52,60 @@ else:
     raise Exception("No such model!")
 
 train_transform = transforms.Compose([transforms.RandomCrop(32, padding=4),
-                                          transforms.RandomHorizontalFlip(),
-                                          transforms.ToTensor()])
+                                      transforms.RandomHorizontalFlip(),
+                                      transforms.ToTensor()])
 eval_transform = transforms.Compose([transforms.ToTensor()])
 
 # load data
 if 'cifar' in data_name:
-    train_data = dataset(data_root, train=True, transform=train_transform, download=True)
+    train_data = dataset(data_root, train=True,
+                         transform=train_transform, download=True)
     if noise_split > 0:
         train_targets = np.array(train_data.targets)
         data_size = len(train_targets)
-        random_index = random.sample(range(data_size), int(data_size*noise_split))
+        random_index = random.sample(
+            range(data_size), int(data_size*noise_split))
         random_part = train_targets[random_index]
         np.random.shuffle(random_part)
         train_targets[random_index] = random_part
         train_data.targets = train_targets.tolist()
 
-        noise_data = dataset(data_root, train=False, transform=eval_transform, download=True)
+        noise_data = dataset(data_root, train=False,
+                             transform=eval_transform, download=True)
         noise_data.targets = random_part.tolist()
         noise_data.data = train_data.data[random_index]
 
     test_data = dataset(data_root, train=False, transform=eval_transform)
-    var_data = dataset(data_root, train=True, transform=eval_transform, download=True)
+    var_data = dataset(data_root, train=True,
+                       transform=eval_transform, download=True)
 
 elif 'svhn' in data_name:
-    train_data = dataset(data_root, split='train', transform=train_transform, download=True)
+    train_data = dataset(data_root, split='train',
+                         transform=train_transform, download=True)
     if noise_split > 0:
         train_targets = np.array(train_data.labels)
         data_size = len(train_targets)
-        random_index = random.sample(range(data_size), int(data_size * noise_split))
+        random_index = random.sample(
+            range(data_size), int(data_size * noise_split))
         random_part = train_targets[random_index]
         np.random.shuffle(random_part)
         train_targets[random_index] = random_part
         train_data.labels = train_targets.tolist()
 
-        noise_data = dataset(data_root, split='test', transform=eval_transform, download=True)
+        noise_data = dataset(data_root, split='test',
+                             transform=eval_transform, download=True)
         noise_data.labels = random_part.tolist()
         noise_data.data = train_data.data[random_index]
     test_data = dataset(data_root, split='test', transform=eval_transform)
-    var_data = dataset(data_root, split='train', transform=eval_transform, download=True)
+    var_data = dataset(data_root, split='train',
+                       transform=eval_transform, download=True)
 
 train_loader = torch.utils.data.DataLoader(train_data, batch_size=train_batch_size, shuffle=True, num_workers=0,
                                            drop_last=True)
 test_loader = torch.utils.data.DataLoader(test_data, batch_size=eval_batch_size, shuffle=False, num_workers=0,
                                           drop_last=False)
 var_loader = torch.utils.data.DataLoader(var_data, batch_size=train_batch_size, shuffle=False, num_workers=0,
-                                          drop_last=False)
+                                         drop_last=False)
 
 if noise_split > 0:
     noise_loader = torch.utils.data.DataLoader(noise_data, batch_size=eval_batch_size, shuffle=True, num_workers=0,
@@ -104,6 +113,7 @@ if noise_split > 0:
 
 # build model
 device = torch.device("cuda" if torch.cuda.is_available() else 'cpu')
+print(f"Using device {device}")
 model = model.to(device)
 
 criterion = torch.nn.CrossEntropyLoss()
@@ -130,14 +140,23 @@ for id_epoch in range(train_epoch):
     train_size = 0
 
     for id_batch, (inputs, targets) in enumerate(train_loader):
-        loss, acc, correct, _, _ = wrapper.train_on_batch_with_gradients_recorded(inputs, targets)
-
-
+        loss, acc, correct, _, _ = wrapper.train_on_batch_with_gradients_recorded(
+            inputs, targets)
         train_loss += loss
         train_acc += correct
         train_size += len(targets)
         print("epoch:{}/{}, batch:{}/{}, loss={}, acc={}".
               format(id_epoch + 1, train_epoch, id_batch + 1, len(train_loader), loss, acc))
+
+    # ========================================================
+    # Calculate the measures and bounds
+    measures, bounds = wrapper.calculate_measurements(
+        train_loader, test_loader, criterion, data_name)
+    print("measure: ")
+    print(measures)
+    print("bounds: ")
+    print(bounds)
+    # =========================================================
 
     # recorder loss and acc
     train_loss /= id_batch + 1
@@ -153,7 +172,8 @@ for id_epoch in range(train_epoch):
     # eval
     wrapper.eval()
     test_loss, test_acc = wrapper.eval_all(test_loader)
-    print("epoch:{}/{}, batch:{}/{}, testing...".format(id_epoch + 1, train_epoch, id_batch + 1, len(train_loader)))
+    print("epoch:{}/{}, batch:{}/{}, testing...".format(id_epoch +
+                                                        1, train_epoch, id_batch + 1, len(train_loader)))
     print("clean: loss={}, acc={}".format(test_loss, test_acc))
     writer.add_scalar("test acc", test_acc, id_epoch+1)
     writer.add_scalar("test loss", test_loss, id_epoch+1)
