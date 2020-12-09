@@ -1,6 +1,6 @@
 # Optimization Variance: Delve into the Epoch-Wise Double Descent of DNNs
 
-This repository is the official implementation of **Optimization Variance: Delve into the Epoch-Wise Double Descent of DNNs**
+Exploring the implementation **Optimization Variance: Delve into the Epoch-Wise Double Descent of DNNs** from https://github.com/ZhangXiao96/OptimizationVariance
 
 ## Requirements
 
