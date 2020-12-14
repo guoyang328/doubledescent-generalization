@@ -24,11 +24,11 @@ class BasicBlock(nn.Module):
         # residual function
         self.residual_function = nn.Sequential(
             nn.Conv2d(in_channels, out_channels, kernel_size=3,
-                      stride=stride, padding=1, bias=False),
+                      stride=stride, padding=1, bias=True),
             nn.BatchNorm2d(out_channels),
             nn.ReLU(inplace=True),
             nn.Conv2d(out_channels, out_channels * BasicBlock.expansion,
-                      kernel_size=3, padding=1, bias=False),
+                      kernel_size=3, padding=1, bias=True),
             nn.BatchNorm2d(out_channels * BasicBlock.expansion)
         )
 
@@ -40,7 +40,7 @@ class BasicBlock(nn.Module):
         if stride != 1 or in_channels != BasicBlock.expansion * out_channels:
             self.shortcut = nn.Sequential(
                 nn.Conv2d(in_channels, out_channels * BasicBlock.expansion,
-                          kernel_size=1, stride=stride, bias=False),
+                          kernel_size=1, stride=stride, bias=True),
                 nn.BatchNorm2d(out_channels * BasicBlock.expansion)
             )
 
@@ -56,15 +56,15 @@ class BottleNeck(nn.Module):
     def __init__(self, in_channels, out_channels, stride=1):
         super().__init__()
         self.residual_function = nn.Sequential(
-            nn.Conv2d(in_channels, out_channels, kernel_size=1, bias=False),
+            nn.Conv2d(in_channels, out_channels, kernel_size=1, bias=True),
             nn.BatchNorm2d(out_channels),
             nn.ReLU(inplace=True),
             nn.Conv2d(out_channels, out_channels, stride=stride,
-                      kernel_size=3, padding=1, bias=False),
+                      kernel_size=3, padding=1, bias=True),
             nn.BatchNorm2d(out_channels),
             nn.ReLU(inplace=True),
             nn.Conv2d(out_channels, out_channels *
-                      BottleNeck.expansion, kernel_size=1, bias=False),
+                      BottleNeck.expansion, kernel_size=1, bias=True),
             nn.BatchNorm2d(out_channels * BottleNeck.expansion),
         )
 
@@ -73,7 +73,7 @@ class BottleNeck(nn.Module):
         if stride != 1 or in_channels != out_channels * BottleNeck.expansion:
             self.shortcut = nn.Sequential(
                 nn.Conv2d(in_channels, out_channels * BottleNeck.expansion,
-                          stride=stride, kernel_size=1, bias=False),
+                          stride=stride, kernel_size=1, bias=True),
                 nn.BatchNorm2d(out_channels * BottleNeck.expansion)
             )
 
@@ -89,7 +89,7 @@ class ResNet(nn.Module):
         # self.in_channels = 64
 
         # self.conv1 = nn.Sequential(
-        #     nn.Conv2d(3, 64, kernel_size=3, padding=1, bias=False),
+        #     nn.Conv2d(3, 64, kernel_size=3, padding=1, bias=True),
         #     nn.BatchNorm2d(64),
         #     nn.ReLU(inplace=True))
         # #we use a different inputsize than the original paper
@@ -104,7 +104,7 @@ class ResNet(nn.Module):
         self.in_channels = 64
 
         # conv1 = nn.Sequential(
-        #     nn.Conv2d(3, 64, kernel_size=3, padding=1, bias=False),
+        #     nn.Conv2d(3, 64, kernel_size=3, padding=1, bias=True),
         #     nn.BatchNorm2d(64),
         #     nn.ReLU(inplace=True))
 

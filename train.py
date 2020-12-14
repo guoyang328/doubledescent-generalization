@@ -9,7 +9,7 @@ from measure import *
 from ModelWrapper import ModelWrapper
 
 args = sys.argv
-data_name = 'svhn' #  args[1]     # 'svhn', 'cifar10', 'cifar100'
+data_name = 'cifar10' #  args[1]     # 'svhn', 'cifar10', 'cifar100'
 model_name = 'resnet18' # args[2]    # 'resnet18', 'resnet34', 'vgg16', 'vgg13', 'vgg11'
 noise_split = float(args[1])
 opt = 'adam' #args[4]
@@ -150,6 +150,7 @@ for id_epoch in range(train_epoch):
 
     # ========================================================
     # Calculate the measures and bounds
+    print("Calculating measurements: ")
     measures, bounds = wrapper.calculate_measurements(
         train_loader, test_loader, criterion, data_name)
     print("measure: ")
